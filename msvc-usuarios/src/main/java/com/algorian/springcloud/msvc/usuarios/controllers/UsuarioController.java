@@ -12,14 +12,10 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
 @RestController
-@RequestMapping("/usuario")
 public class UsuarioController {
 
-    private final IUsuarioService _usuarioServices;
-
-    public UsuarioController(IUsuarioService usuarioServices) {
-        _usuarioServices = usuarioServices;
-    }
+    @Autowired
+    private IUsuarioService _usuarioServices;
 
     @GetMapping
     public List<Usuario> listar() {
@@ -35,12 +31,15 @@ public class UsuarioController {
         return ResponseEntity.notFound().build();
     }
 
-    @PostMapping
+    @PostMapping("/")
     public ResponseEntity<?> crear(@Valid @RequestBody Usuario usuario, BindingResult result) {
+        //  VALIDAR SI ALGUNO DE LOS DATOS RECIBIDOS PARA CREAR  USUARIO NO CUMPLE CON LAS ESPECIFICACIONES
         if (result.hasErrors()) return validarCampos(result);
+        //  VALIDAR SI EL EMAIL QUE INGRESA EL USUARIO NUEVO YA ESTÁ REGISTRADO
         if (_usuarioServices.existeEmail(usuario.getEmail()))
             return ResponseEntity.badRequest()
                     .body(Collections.singletonMap("mensaje", "Ya existe un usuario con ese correo electronico"));
+        //  CREACIÓN DE USUARIO SI TODO SALIÓ BIEN
         return ResponseEntity.status(HttpStatus.CREATED).body(_usuarioServices.guardar(usuario));
     }
 
@@ -50,6 +49,7 @@ public class UsuarioController {
         Optional<Usuario> o = _usuarioServices.porId(id);
         if (o.isPresent()) {
             Usuario usuarioDb = o.get();
+            //  VALIDAR SI EL EMAIL QUE INGRESA EL USUARIO A MODIFICAR ES DIFERENTE Y SI YA ESTÁ REGISTRADO EN OTRO USUARIO
             if (!usuario.getEmail().equalsIgnoreCase(usuarioDb.getEmail()) && _usuarioServices.buscarPorEmail(usuario.getEmail()).isPresent())
                 return ResponseEntity.badRequest().body(Collections.singletonMap("mensaje", "Ya existe un usuario con ese correo electronico"));
             usuarioDb.setNombre(usuario.getNombre());
@@ -71,8 +71,7 @@ public class UsuarioController {
     }
 
 
-    //  MÉTODOS EXTERNOS
-
+    //  MÉTODOS ÚTILS
     private static ResponseEntity<Map<String, String>> validarCampos(BindingResult result) {
         Map<String, String> errores = new HashMap<>();
         // Obtener todos los errores de campo

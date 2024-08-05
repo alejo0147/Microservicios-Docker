@@ -1,7 +1,8 @@
-package com.algorian.springcloud.msvc.usuarios.services;
+package com.algorian.springcloud.msvc.usuarios.implement;
 
 import com.algorian.springcloud.msvc.usuarios.models.entity.Usuario;
 import com.algorian.springcloud.msvc.usuarios.repositories.IUsuarioRepository;
+import com.algorian.springcloud.msvc.usuarios.services.IUsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
