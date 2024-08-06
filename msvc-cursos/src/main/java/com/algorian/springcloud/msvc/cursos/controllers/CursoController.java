@@ -26,7 +26,7 @@ public class CursoController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> detalle(@PathVariable Long id) {
-        Optional<Curso> o = _cursoService.porId(id);
+        Optional<Curso> o = _cursoService.porIdConUsuarios(id);     //_cursoService.porId(id);
         if (o.isPresent()) {
             return ResponseEntity.ok(o.get());
         }
@@ -60,6 +60,14 @@ public class CursoController {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
+    }
+
+
+    //  MÉTODO ELIMINAR cursoUsuario QUE SERÁ CONSUMIDO DESDE SERVICIO usuario
+    @DeleteMapping("/eliminar-curso-usuario/{id}")
+    public ResponseEntity<?> eliminarCursoUsuarioPorId(@PathVariable Long id){
+        _cursoService.eliminarCurUsuPorId(id);
+        return ResponseEntity.noContent().build();
     }
 
 
@@ -112,6 +120,7 @@ public class CursoController {
         }
         return ResponseEntity.notFound().build();
     }
+
 
     //  MÉTODO ÚTIL
     private ResponseEntity<Map<String, String>> validarCampos(BindingResult result) {

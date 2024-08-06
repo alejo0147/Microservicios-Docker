@@ -70,6 +70,11 @@ public class UsuarioController {
         return ResponseEntity.notFound().build();
     }
 
+    @GetMapping("/usuarios-por-curso")
+    public ResponseEntity<?> obtenerUsuPorId(@RequestParam  List<Long> ids ){
+        return ResponseEntity.ok(_usuarioServices.listarPorIds(ids));
+    }
+
 
     //  MÉTODOS ÚTILS
     private static ResponseEntity<Map<String, String>> validarCampos(BindingResult result) {

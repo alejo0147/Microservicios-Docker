@@ -14,7 +14,14 @@ public interface IUsuarioService {
 
     void eliminar(Long id);
 
+    List<Usuario> listarPorIds(Iterable<Long> ids);
+
+
+    //  MÉTODOS CREADOS
     Optional<Usuario> buscarPorEmail(String email);
 
     boolean existeEmail(String email);
+
+
+
 }

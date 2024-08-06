@@ -1,5 +1,6 @@
 package com.algorian.springcloud.msvc.usuarios.implement;
 
+import com.algorian.springcloud.msvc.usuarios.client.ICursoClientRest;
 import com.algorian.springcloud.msvc.usuarios.models.entity.Usuario;
 import com.algorian.springcloud.msvc.usuarios.repositories.IUsuarioRepository;
 import com.algorian.springcloud.msvc.usuarios.services.IUsuarioService;
@@ -12,10 +13,16 @@ import java.util.Optional;
 
 @Service
 public class UsuarioServiceImpl implements IUsuarioService {
-    private final IUsuarioRepository _usuarioRepository;
 
+    //  DEPENDENCIAS A INYECTAR
+    private final IUsuarioRepository _usuarioRepository;
+    @Autowired
+    private  ICursoClientRest _clientRest;
+
+
+    //  CONSTRUCTOR PARA INYECTAR DEPENDENCIA
     public UsuarioServiceImpl(IUsuarioRepository usuarioRepository) {
-        _usuarioRepository = usuarioRepository;
+        this._usuarioRepository = usuarioRepository;
     }
 
 
@@ -25,8 +32,8 @@ public class UsuarioServiceImpl implements IUsuarioService {
         return (List<Usuario>) _usuarioRepository.findAll();
     }
 
-    @Transactional(readOnly = true)
     @Override
+    @Transactional(readOnly = true)
     public Optional<Usuario> porId(Long id) {
         return _usuarioRepository.findById(id);
     }
@@ -41,6 +48,13 @@ public class UsuarioServiceImpl implements IUsuarioService {
     @Transactional
     public void eliminar(Long id) {
         _usuarioRepository.deleteById(id);
+        _clientRest.eliminarCursoUsuarioPorId(id);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Usuario> listarPorIds(Iterable<Long> ids) {
+        return (List<Usuario>) _usuarioRepository.findAllById(ids);
     }
 
     @Override

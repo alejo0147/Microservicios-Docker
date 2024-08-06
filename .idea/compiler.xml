@@ -12,7 +12,7 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="manejo-kubernetes" target="17" />
+      <module name="curso-kubernetes" target="17" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">

@@ -17,49 +17,55 @@ import java.util.Optional;
 public class CursoServiceImpl implements ICursoService {
 
     @Autowired
-    private ICursoRepository repository;
+    private ICursoRepository _cursoRepository;
 
     @Autowired
-    private IUsuarioClientRest client;
+    private IUsuarioClientRest _clientRest;
 
 
     @Override
     @Transactional(readOnly = true)
     public List<Curso> listar() {
-        return (List<Curso>) repository.findAll();
+        return (List<Curso>) _cursoRepository.findAll();
     }
 
     @Override
     @Transactional(readOnly = true)
     public Optional<Curso> porId(Long id) {
-        return repository.findById(id);
+        return _cursoRepository.findById(id);
     }
 
     @Override
     @Transactional
     public Curso guardar(Curso Curso) {
-        return repository.save(Curso);
+        return _cursoRepository.save(Curso);
     }
 
     @Override
     @Transactional
     public void eliminar(Long id) {
-        repository.deleteById(id);
+        _cursoRepository.deleteById(id);
+    }
+
+    @Override
+    @Transactional
+    public void eliminarCurUsuPorId(Long id) {
+        _cursoRepository.eliminarCursoUsuarioPorId(id);
     }
 
     @Override
     @Transactional
     public Optional<Usuario> asignarUsuario(Usuario usuario, Long cursoId) {
-        Optional<Curso> o = repository.findById(cursoId);
-        if (o.isPresent()) {
-            Usuario usuarioMsvc = client.detalle(usuario.getId());
+        Optional<Curso> cursoOptional = _cursoRepository.findById(cursoId);
+        if (cursoOptional.isPresent()) {
+            Usuario usuarioMsvc = _clientRest.detalle(usuario.getId());
 
-            Curso Curso = o.get();
+            Curso Curso = cursoOptional.get();
             CursoUsuario cursoUsuario = new CursoUsuario();
             cursoUsuario.setUsuarioId(usuarioMsvc.getId());
 
             Curso.addCursoUsuario(cursoUsuario);
-            repository.save(Curso);
+            _cursoRepository.save(Curso);
             return Optional.of(usuarioMsvc);
         }
 
@@ -69,16 +75,16 @@ public class CursoServiceImpl implements ICursoService {
     @Override
     @Transactional
     public Optional<Usuario> crearUsuario(Usuario usuario, Long cursoId) {
-        Optional<Curso> o = repository.findById(cursoId);
-        if (o.isPresent()) {
-            Usuario usuarioNuevoMsvc = client.crear(usuario);
+        Optional<Curso> cursoOptional = _cursoRepository.findById(cursoId);
+        if (cursoOptional.isPresent()) {
+            Usuario usuarioNuevoMsvc = _clientRest.crear(usuario);
 
-            Curso Curso = o.get();
+            Curso Curso = cursoOptional.get();
             CursoUsuario cursoUsuario = new CursoUsuario();
             cursoUsuario.setUsuarioId(usuarioNuevoMsvc.getId());
 
             Curso.addCursoUsuario(cursoUsuario);
-            repository.save(Curso);
+            _cursoRepository.save(Curso);
             return Optional.of(usuarioNuevoMsvc);
         }
 
@@ -88,19 +94,36 @@ public class CursoServiceImpl implements ICursoService {
     @Override
     @Transactional
     public Optional<Usuario> eliminarUsuario(Usuario usuario, Long cursoId) {
-        Optional<Curso> o = repository.findById(cursoId);
-        if (o.isPresent()) {
-            Usuario usuarioMsvc = client.detalle(usuario.getId());
+        Optional<Curso> cursoOptional = _cursoRepository.findById(cursoId);
+        if (cursoOptional.isPresent()) {
+            Usuario usuarioMsvc = _clientRest.detalle(usuario.getId());
 
-            Curso Curso = o.get();
+            Curso Curso = cursoOptional.get();
             CursoUsuario cursoUsuario = new CursoUsuario();
             cursoUsuario.setUsuarioId(usuarioMsvc.getId());
 
             Curso.removeCursoUsuario(cursoUsuario);
-            repository.save(Curso);
+            _cursoRepository.save(Curso);
             return Optional.of(usuarioMsvc);
         }
+        return Optional.empty();
+    }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<Curso> porIdConUsuarios(Long id) {
+        Optional<Curso> cursoOptional = _cursoRepository.findById(id);
+        if (cursoOptional.isPresent()) {
+            Curso curso = cursoOptional.get();
+            //  SI cursoUsuario NO ES VACÍO ES PORQUE HAY ALUMNOS
+            if (!curso.getCursoUsuarios().isEmpty()) {
+                //  CREAR LISTA DE IDs USANDO LAMBDA CON Map Y ToList
+                List<Long> ids = curso.getCursoUsuarios().stream().map(CursoUsuario::getUsuarioId).toList();
+                List<Usuario> usuariosCurso = _clientRest.obtenerUsuPorId(ids);
+                curso.setUsuarios(usuariosCurso);
+            }
+            return Optional.of(curso);
+        }
         return Optional.empty();
     }
 }
