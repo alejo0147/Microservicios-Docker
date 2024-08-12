@@ -4,6 +4,7 @@ import com.algorian.springcloud.msvc.cursos.models.Usuario;
 import com.algorian.springcloud.msvc.cursos.models.entity.Curso;
 import com.algorian.springcloud.msvc.cursos.services.ICursoService;
 import feign.FeignException;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -60,6 +61,16 @@ public class CursoController {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/excel")
+    public void generateExcelreport(HttpServletResponse response) {
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        String headerKey = "Content-Disposition";
+        String headerValue = "attachment; filename=cursos.xlsx";
+        response.setHeader(headerKey, headerValue);
+
+        _cursoService.generateExcel(response);
     }
 
 

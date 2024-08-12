@@ -6,10 +6,16 @@ import com.algorian.springcloud.msvc.cursos.models.entity.Curso;
 import com.algorian.springcloud.msvc.cursos.models.entity.CursoUsuario;
 import com.algorian.springcloud.msvc.cursos.repositories.ICursoRepository;
 import com.algorian.springcloud.msvc.cursos.services.ICursoService;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.HttpServletResponse;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -52,6 +58,36 @@ public class CursoServiceImpl implements ICursoService {
     public void eliminarCurUsuPorId(Long id) {
         _cursoRepository.eliminarCursoUsuarioPorId(id);
     }
+
+    @Override
+    public void generateExcel(HttpServletResponse response) {
+        List<Curso> cursos = (List<Curso>) _cursoRepository.findAll();
+
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        XSSFSheet sheet = workbook.createSheet("Info cursos");
+        XSSFRow row = sheet.createRow(0);
+
+        row.createCell(0).setCellValue("ID");
+        row.createCell(1).setCellValue("NOMBRE");
+
+        int dataRowIndex = 1;
+
+        for (Curso curso : cursos){
+            XSSFRow dataRow = sheet.createRow(dataRowIndex);
+            dataRow.createCell(0).setCellValue(curso.getId());
+            dataRow.createCell(1).setCellValue(curso.getNombre());
+            dataRowIndex++;
+        }
+        try {
+            ServletOutputStream ops = response.getOutputStream();
+            workbook.write(ops);
+            workbook.close();
+            ops.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
     @Override
     @Transactional

@@ -2,6 +2,7 @@ package com.algorian.springcloud.msvc.cursos.services;
 
 import com.algorian.springcloud.msvc.cursos.models.Usuario;
 import com.algorian.springcloud.msvc.cursos.models.entity.Curso;
+import jakarta.servlet.http.HttpServletResponse;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,6 +18,8 @@ public interface ICursoService {
     void eliminar(Long id);
 
     void eliminarCurUsuPorId(Long id);
+    
+    void generateExcel(HttpServletResponse response);
 
 
     //  MÉTODOS EXTERNOS CON LÓGICA DE NEGOCIO CON DATOS QUE SE OBTIENEN DE OTRO SERVICIO
