@@ -1,66 +1,52 @@
 package com.algorian.springcloud.msvc.cursos.controllers;
 
 import com.algorian.springcloud.msvc.cursos.models.Usuario;
-import com.algorian.springcloud.msvc.cursos.models.entity.Curso;
+import com.algorian.springcloud.msvc.cursos.entity.Curso;
 import com.algorian.springcloud.msvc.cursos.services.ICursoService;
-import feign.FeignException;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
+@RequiredArgsConstructor
 @RestController
 public class CursoController {
 
-    @Autowired
-    private ICursoService _cursoService;
+    private final ICursoService _cursoService;
 
     @GetMapping
     public ResponseEntity<List<Curso>> listar() {
-        return ResponseEntity.ok(_cursoService.listar());
+        return _cursoService.listar();
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> detalle(@PathVariable Long id) {
-        Optional<Curso> o = _cursoService.porIdConUsuarios(id);     //_cursoService.porId(id);
-        if (o.isPresent()) {
-            return ResponseEntity.ok(o.get());
-        }
-        return ResponseEntity.notFound().build();
+        return _cursoService.porIdConUsuarios(id);
     }
 
     @PostMapping("/")
     public ResponseEntity<?> crear(@Valid @RequestBody Curso curso, BindingResult result) {
-        if (result.hasErrors()) return validarCampos(result);
-        Curso cursoDb = _cursoService.guardar(curso);
-        return ResponseEntity.status(HttpStatus.CREATED).body(cursoDb);
+        return _cursoService.guardar(curso, result);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<?> editar(@Valid @RequestBody Curso curso, BindingResult result, @PathVariable Long id) {
-        if (result.hasErrors()) return validarCampos(result);
-        Optional<Curso> o = _cursoService.porId(id);
-        if (o.isPresent()) {
-            Curso cursoDb = o.get();
-            cursoDb.setNombre(curso.getNombre());
-            return ResponseEntity.status(HttpStatus.CREATED).body(_cursoService.guardar(cursoDb));
-        }
-        return ResponseEntity.notFound().build();
+        return _cursoService.editar(curso, id, result);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> eliminar(@PathVariable Long id) {
-        Optional<Curso> o = _cursoService.porId(id);
-        if (o.isPresent()) {
-            _cursoService.eliminar(o.get().getId());
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
+    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+        return _cursoService.eliminar(id);
+    }
+
+    //  MÉTODO ELIMINAR cursoUsuario QUE SERÁ CONSUMIDO DESDE SERVICIO usuario
+    @DeleteMapping("/eliminar-curso-usuario/{id}")
+    public ResponseEntity<?> eliminarCursoUsuarioPorId(@PathVariable Long usuarioId){
+        return  _cursoService.eliminarCurUsuPorId(usuarioId);
     }
 
     @GetMapping("/excel")
@@ -74,75 +60,21 @@ public class CursoController {
     }
 
 
-    //  MÉTODO ELIMINAR cursoUsuario QUE SERÁ CONSUMIDO DESDE SERVICIO usuario
-    @DeleteMapping("/eliminar-curso-usuario/{id}")
-    public ResponseEntity<?> eliminarCursoUsuarioPorId(@PathVariable Long id){
-        _cursoService.eliminarCurUsuPorId(id);
-        return ResponseEntity.noContent().build();
-    }
-
-
     //  MÉTODOS COMUNICACIÓN SERVICIOS EXTERNOS
     //  MODIFICAR cursoUsuario Y ASIGNAR USUARIO Y CURSO
     @PutMapping("/asignar-usuario/{cursoId}")
     public ResponseEntity<?> asignarUsuario(@RequestBody Usuario usuario, @PathVariable Long cursoId) {
-        Optional<Usuario> o;
-        try {
-            o = _cursoService.asignarUsuario(usuario, cursoId);
-        } catch (FeignException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Collections.singletonMap("mensaje", "No existe el usuario por " +
-                            "el id o error en la comunicacion: " + e.getMessage()));
-        }
-        if (o.isPresent()) {
-            return ResponseEntity.status(HttpStatus.CREATED).body(o.get());
-        }
-        return ResponseEntity.notFound().build();
+        return _cursoService.asignarUsuario(usuario, cursoId);
     }
 
     @PostMapping("/crear-usuario/{cursoId}")
     public ResponseEntity<?> crearUsuario(@RequestBody Usuario usuario, @PathVariable Long cursoId) {
-        Optional<Usuario> o;
-        try {
-            o = _cursoService.crearUsuario(usuario, cursoId);
-        } catch (FeignException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Collections.singletonMap("mensaje", "No se pudo crear el usuario " +
-                            "o error en la comunicacion: " + e.getMessage()));
-        }
-        if (o.isPresent()) {
-            return ResponseEntity.status(HttpStatus.CREATED).body(o.get());
-        }
-        return ResponseEntity.notFound().build();
+        return _cursoService.crearUsuario(usuario, cursoId);
     }
 
     @DeleteMapping("/eliminar-usuario/{cursoId}")
     public ResponseEntity<?> eliminarUsuario(@RequestBody Usuario usuario, @PathVariable Long cursoId) {
-        Optional<Usuario> o;
-        try {
-            o = _cursoService.eliminarUsuario(usuario, cursoId);
-        } catch (FeignException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Collections.singletonMap("mensaje", "No existe el usuario por " +
-                            "el id o error en la comunicacion: " + e.getMessage()));
-        }
-        if (o.isPresent()) {
-            return ResponseEntity.status(HttpStatus.OK).body(o.get());
-        }
-        return ResponseEntity.notFound().build();
-    }
-
-
-    //  MÉTODO ÚTIL
-    private ResponseEntity<Map<String, String>> validarCampos(BindingResult result) {
-        Map<String, String> errores = new HashMap<>();
-        // Obtener todos los errores de campo
-        result.getFieldErrors().forEach(err -> {
-            // Añadir cada error al mapa
-            errores.put(err.getField(), "El campo " + err.getField() + " " + err.getDefaultMessage());
-        });
-        // Retornar el mapa de errores en la respuesta
-        return ResponseEntity.badRequest().body(errores);
+        return _cursoService.eliminarUsuario(usuario, cursoId);
     }
 
 }

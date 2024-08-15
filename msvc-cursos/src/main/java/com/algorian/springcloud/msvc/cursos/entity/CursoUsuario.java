@@ -1,4 +1,4 @@
-package com.algorian.springcloud.msvc.cursos.models.entity;
+package com.algorian.springcloud.msvc.cursos.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -20,12 +20,13 @@ public class CursoUsuario {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj){
-            return  true;
-        }
-        if (!(obj instanceof CursoUsuario cursoUsuario)){
-            return false;
-        }
+
+        //  VALIDAR SI EL OBJETO SÍ ES UNA INSTANCIA DE CursoUsuario
+        if (this == obj) return  true;
+        //  VALIDAR SI EL OBJETO NO ES UNA INSTANCIA DE CursoUsuario
+        if (!(obj instanceof CursoUsuario cursoUsuario)) return false;
+
+        //  SI ES DIFERENTE A NULO Y EL ID ES IGUAL, NOS DEVOLVERÁ EL ID
         return this.usuarioId != null && this.usuarioId.equals(cursoUsuario.usuarioId);
     }
 }

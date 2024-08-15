@@ -1,4 +1,4 @@
-package com.algorian.springcloud.msvc.cursos.models.entity;
+package com.algorian.springcloud.msvc.cursos.entity;
 
 import com.algorian.springcloud.msvc.cursos.models.Usuario;
 import jakarta.persistence.*;
@@ -53,16 +53,6 @@ public class Curso {
     }
 
 
-    //  MÉTODOS DE CursoUsuario
-    public void addCursoUsuario(CursoUsuario cursoUsuario){
-        cursoUsuarios.add(cursoUsuario);
-    }
-
-    public void removeCursoUsuario(CursoUsuario cursoUsuario){
-        cursoUsuarios.remove(cursoUsuario);
-    }
-
-
     //  GETTERS AND SETTERS CursoUsuario
     public List<CursoUsuario> getCursoUsuarios() {
         return cursoUsuarios;
@@ -81,4 +71,13 @@ public class Curso {
     public void setUsuarios(List<Usuario> usuarios) {
         this.usuarios = usuarios;
     }
+
+
+    //  MÉTODOS DE CursoUsuario
+    public void addCursoUsuario(CursoUsuario cursoUsuario){ cursoUsuarios.add(cursoUsuario); }
+
+    public void removeCursoUsuario(CursoUsuario cursoUsuario){
+        cursoUsuarios.remove(cursoUsuario);
+    }
+
 }

@@ -1,36 +1,40 @@
 package com.algorian.springcloud.msvc.cursos.services;
 
 import com.algorian.springcloud.msvc.cursos.models.Usuario;
-import com.algorian.springcloud.msvc.cursos.models.entity.Curso;
+import com.algorian.springcloud.msvc.cursos.entity.Curso;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface ICursoService {
 
-    List<Curso> listar();
+    ResponseEntity<List<Curso>> listar();
+
+    //  Listar los usuarios que pertenecen a un curso
+    ResponseEntity<?> porIdConUsuarios(Long id);
 
     Optional<Curso> porId(Long id);
 
-    Curso guardar(Curso curso);
+    ResponseEntity<?> guardar(Curso curso, BindingResult result);
 
-    void eliminar(Long id);
+    ResponseEntity<?> editar(Curso curso, Long id, BindingResult result);
 
-    void eliminarCurUsuPorId(Long id);
-    
+    ResponseEntity<Void> eliminar(Long id);
+
+    ResponseEntity<Void> eliminarCurUsuPorId(Long usuarioId);
+
     void generateExcel(HttpServletResponse response);
 
 
-    //  MÉTODOS EXTERNOS CON LÓGICA DE NEGOCIO CON DATOS QUE SE OBTIENEN DE OTRO SERVICIO
-
+    //  FeingClients a USUARIO
     //  RECIBE EL USUARIO Y EL ID DEL CURSO PARA AGREGAR A LA TABLA cursos_usuarios
-    Optional<Usuario> asignarUsuario(Usuario usuario, Long cursoId);    //  ASIGNAR UN USUARIO EXISTENTE EN BBDD MYSQL
+    ResponseEntity<?> asignarUsuario(Usuario usuario, Long cursoId);    //  ASIGNAR UN USUARIO EXISTENTE DE BBDD MYSQL
 
-    Optional<Usuario> crearUsuario(Usuario usuario, Long cursoId);      //  CREAR DESDE MSVC_CURSO UN USUARIO EN BBDD MYSQL
+    ResponseEntity<?> crearUsuario(Usuario usuario, Long cursoId);      //  CREAR DESDE MSVC_CURSO UN USUARIO EN BBDD MYSQL
 
-    Optional<Usuario> eliminarUsuario(Usuario usuario, Long cursoId);   //  DESASIGNAR UN USUARIO EN UN CURSO
-
-    Optional<Curso> porIdConUsuarios(Long id);
+    ResponseEntity<?> eliminarUsuario(Usuario usuario, Long cursoId);   //  DESASIGNAR UN USUARIO EN UN CURSO
 
 }
