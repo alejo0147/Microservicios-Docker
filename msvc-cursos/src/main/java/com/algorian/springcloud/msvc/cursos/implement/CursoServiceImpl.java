@@ -77,9 +77,12 @@ public class CursoServiceImpl implements ICursoService {
 
         Curso curso = cursoOptional.get();
         if (!curso.getCursoUsuarios().isEmpty()) {
+            //  Declaro una variable de tipo lista para que tome los usuarioId que tiene CursoUsuario
             List<Long> ids = curso.getCursoUsuarios().stream().map(CursoUsuario::getUsuarioId).toList();
             try {
+                //  Variable de tipo lista de Usuarios tendrá los valores que nos retorne el servico
                 List<Usuario> usuariosCurso = _clientRest.obtenerUsuPorId(ids);
+                //  La variable que contiene la lista de Usuarios nos mostrará los que pertenecen a este curso
                 curso.setUsuarios(usuariosCurso);
             } catch (FeignException e) {
                 return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)

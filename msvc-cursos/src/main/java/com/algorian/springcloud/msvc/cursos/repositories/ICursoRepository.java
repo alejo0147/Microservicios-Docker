@@ -8,6 +8,7 @@ import org.springframework.data.repository.CrudRepository;
 public interface ICursoRepository extends CrudRepository<Curso, Long> {
 
     @Modifying
+    //  Se añade la siguiente anotación por lo que no es solo un consulta ↑
     @Query("DELETE FROM CursoUsuario cu WHERE cu.usuarioId=?1")
     int eliminarCursoUsuarioPorUsuarioId(Long usuarioId);
 

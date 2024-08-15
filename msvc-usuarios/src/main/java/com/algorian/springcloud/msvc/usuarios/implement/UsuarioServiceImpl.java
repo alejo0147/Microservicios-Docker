@@ -5,6 +5,8 @@ import com.algorian.springcloud.msvc.usuarios.models.entity.Usuario;
 import com.algorian.springcloud.msvc.usuarios.repositories.IUsuarioRepository;
 import com.algorian.springcloud.msvc.usuarios.services.IUsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,17 +16,10 @@ import java.util.Optional;
 @Service
 public class UsuarioServiceImpl implements IUsuarioService {
 
-    //  DEPENDENCIAS A INYECTAR
-    private final IUsuarioRepository _usuarioRepository;
+    @Autowired
+    private IUsuarioRepository _usuarioRepository;
     @Autowired
     private  ICursoClientRest _clientRest;
-
-
-    //  CONSTRUCTOR PARA INYECTAR DEPENDENCIA
-    public UsuarioServiceImpl(IUsuarioRepository usuarioRepository) {
-        this._usuarioRepository = usuarioRepository;
-    }
-
 
     @Override
     @Transactional(readOnly = true)
@@ -47,8 +42,20 @@ public class UsuarioServiceImpl implements IUsuarioService {
     @Override
     @Transactional
     public void eliminar(Long id) {
-        _usuarioRepository.deleteById(id);
-        _clientRest.eliminarCursoUsuarioPorId(id);
+        // Primero, intenta eliminar la relación curso-usuario
+        ResponseEntity<Void> response = _clientRest.eliminarCursoUsuarioPorId(id);
+
+        if (response.getStatusCode() == HttpStatus.NO_CONTENT) {
+            // Si se eliminó correctamente la relación curso-usuario, procede a eliminar el usuario
+            _usuarioRepository.deleteById(id);
+        } else if (response.getStatusCode() == HttpStatus.NOT_FOUND) {
+            // Si no se encontró la relación curso-usuario, decide si aún quieres eliminar el usuario
+            // Aquí podrías decidir eliminarlo o lanzar una excepción, dependiendo de la lógica de tu negocio
+            _usuarioRepository.deleteById(id); // O eliminar esta línea si no quieres eliminar el usuario
+        } else {
+            // Si hubo otro tipo de error, puedes manejarlo aquí, por ejemplo lanzando una excepción
+            throw new RuntimeException("Error al eliminar la relación curso-usuario");
+        }
     }
 
     @Override

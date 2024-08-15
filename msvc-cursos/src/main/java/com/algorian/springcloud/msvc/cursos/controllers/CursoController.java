@@ -44,7 +44,7 @@ public class CursoController {
     }
 
     //  MÉTODO ELIMINAR cursoUsuario QUE SERÁ CONSUMIDO DESDE SERVICIO usuario
-    @DeleteMapping("/eliminar-curso-usuario/{id}")
+    @DeleteMapping("/eliminar-curso-usuario/{usuarioId}")
     public ResponseEntity<?> eliminarCursoUsuarioPorId(@PathVariable Long usuarioId){
         return  _cursoService.eliminarCurUsuPorId(usuarioId);
     }

@@ -62,10 +62,16 @@ public class UsuarioController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> eliminar(@PathVariable Long id) {
-        Optional<Usuario> o = _usuarioServices.porId(id);
-        if (o.isPresent()) {
-            _usuarioServices.eliminar(id);
-            return ResponseEntity.noContent().build();
+        Optional<Usuario> usuarioOptional = _usuarioServices.porId(id);
+        if (usuarioOptional.isPresent()) {
+            try {
+                _usuarioServices.eliminar(id);
+                return ResponseEntity.noContent().build();
+            } catch (RuntimeException e) {
+                // Si ocurre un error al eliminar la relación curso-usuario, manejarlo aquí
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body("Error al eliminar la relación curso-usuario: " + e.getMessage());
+            }
         }
         return ResponseEntity.notFound().build();
     }
