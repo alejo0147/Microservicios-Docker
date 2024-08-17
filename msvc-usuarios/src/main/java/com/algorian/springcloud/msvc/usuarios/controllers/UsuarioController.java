@@ -17,9 +17,10 @@ public class UsuarioController {
     @Autowired
     private IUsuarioService _usuarioServices;
 
+    //  LISTAR CON MAP
     @GetMapping
-    public List<Usuario> listar() {
-        return _usuarioServices.listar();
+    public Map<String, List<Usuario>> listar() {
+        return Collections.singletonMap("usuarios", _usuarioServices.listar());
     }
 
     @GetMapping("/{id}")
