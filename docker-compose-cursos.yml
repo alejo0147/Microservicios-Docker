@@ -1,0 +1,44 @@
+services:
+  postgres14:
+    container_name: postgres14
+    image: postgres:14-alpine
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_PASSWORD: 369852
+      POSTGRES_DB: msvc_cursos
+    volumes:
+      - data-postgres:/var/lib/postgresql/data
+    restart: always
+    networks:
+      - spring-cur-usu
+
+  msvc-cursos:
+    container_name: msvc-cursos
+    image: alejo01478/cursos:latest
+#    image: msvc-cursos
+#    build:
+#      context: ./
+#      dockerfile: ./msvc-cursos/Dockerfile
+    ports:
+      - "8002:8002"
+    environment:
+      PORT: 8002
+      DB_HOST: postgres14:5432
+      DB_DATABASE: msvc_cursos
+      DB_USERNAME: postgres
+      DB_PASS: 369852
+      USUARIOS_URL: msvc-usuarios:8001
+    networks:
+      - spring-cur-usu
+    depends_on:
+      - postgres14
+#    restart: always
+
+volumes:
+  data-postgres:
+    name: data-postgres
+
+networks:
+  spring-cur-usu:
+    name: spring-cur-usu
